@@ -187,7 +187,7 @@ def compile(
     Use Cython to compile all Python files in the source directory.
 
     Args:
-        main_file (Optional[str]): The main Python file (relative to source_dir) that won't be compiled but copied.
+        main_file (Optional[str]): The main Python file (relative to source_dir) that will always be copied even exclude_files specifies it.
         data_files (Optional[List[str]]): A list of data files/directories to include (relative to source_dir). Support wildcards.
         exclude_files (Optional[List[str]]): A list of files/directories to exclude from compilation (relative to source_dir).
         source_dir (str): The source directory containing Python files.
@@ -200,12 +200,6 @@ def compile(
 
     # Find all Python files to compile
     py_files = _find_py_files(source_dir, exclude_files)
-
-    # Exclude main file if specified
-    if main_file:
-        main_file_path = os.path.join(source_dir, main_file)
-        if main_file_path in py_files:
-            py_files.remove(main_file_path)
 
     # Convert Python files to C extensions
     ext_modules: List[Extension] = []
@@ -253,7 +247,7 @@ def pack(
     Use PyInstaller to pack files into a single package.
 
     Args:
-        main_file (str): The main Python file (relative to source_dir) that will always be packed even exclude_files specifies it.
+        main_file (str): The main Python or Compiled file (relative to source_dir) that will always be packed even exclude_files specifies it.
         data_files (Optional[List[str]]): A list of data files/directories to include (relative to source_dir). Support wildcards.
         exclude_files (Optional[List[str]]): A list of files/directories to exclude from package (relative to source_dir).
         hidden_imports (Optional[List[str]]): A list of modules to include in the package (e.g., ['numpy']). This will override hidden_imports_from_requirements.
@@ -393,7 +387,7 @@ def compile_and_pack(
     First compile with Cython then pack with PyInstaller.
 
     Args:
-        main_file (str): The main Python file (relative to source_dir) that won't be compiled but packed even exclude_files specifies it.
+        main_file (str): The main Python file (relative to source_dir) that will always be copied and packed even exclude_files specifies it.
         data_files (Optional[List[str]]): A list of data files/directories to include (relative to source_dir). Support wildcards.
         exclude_files (Optional[List[str]]): A list of files/directories to exclude (relative to source_dir).
         hidden_imports (Optional[List[str]]): A list of modules to include in the package. This will override hidden_imports_from_requirements.

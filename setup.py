@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 # Set up the package information
 setuptools.setup(
     name="pybuildhelper",
-    version="0.0.1",
+    version="0.0.2",
     author="pax",
     author_email="coolwinding@foxmail.com",
     description="A python build helper library to compile (obfuscate) and pack Python files using Cython and PyInstaller",
