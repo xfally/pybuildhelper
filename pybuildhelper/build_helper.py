@@ -154,6 +154,27 @@ def _get_hidden_imports_from_requirements(
     return hidden_imports
 
 
+def _expand_wildcards(source_dir: str, data_files: Optional[List[str]]) -> List[str]:
+    """
+    Expand wildcards in data_files using glob.
+
+    Args:
+        source_dir (str): The root source directory.
+        data_files (Optional[List[str]]): A list of files/directories with possible wildcards.
+
+    Returns:
+        List[str]: A list of expanded file paths.
+    """
+    if not data_files:
+        return []
+    expanded_files = []
+    for pattern in data_files:
+        full_pattern = os.path.join(source_dir, pattern)
+        matches = glob.glob(full_pattern, recursive=True)
+        expanded_files.extend(matches)
+    return expanded_files
+
+
 def compile(
     main_file: Optional[str] = None,
     data_files: Optional[List[str]] = None,
@@ -167,7 +188,7 @@ def compile(
 
     Args:
         main_file (Optional[str]): The main Python file (relative to source_dir) that won't be compiled but copied.
-        data_files (Optional[List[str]]): A list of data files/directories to include (relative to source_dir).
+        data_files (Optional[List[str]]): A list of data files/directories to include (relative to source_dir). Support wildcards.
         exclude_files (Optional[List[str]]): A list of files/directories to exclude from compilation (relative to source_dir).
         source_dir (str): The source directory containing Python files.
         intermediate_dir (str): The directory for intermediate build files.
@@ -210,7 +231,8 @@ def compile(
         )
 
     # Copy data files
-    _copy_data_files(source_dir, dist_dir, data_files)
+    expanded_data_files = _expand_wildcards(source_dir, data_files)
+    _copy_data_files(source_dir, dist_dir, expanded_data_files)
 
     print(f"Compilation complete. Compiled files are in {dist_dir}")
 
@@ -232,7 +254,7 @@ def pack(
 
     Args:
         main_file (str): The main Python file (relative to source_dir) that will always be packed even exclude_files specifies it.
-        data_files (Optional[List[str]]): A list of data files/directories to include (relative to source_dir).
+        data_files (Optional[List[str]]): A list of data files/directories to include (relative to source_dir). Support wildcards.
         exclude_files (Optional[List[str]]): A list of files/directories to exclude from package (relative to source_dir).
         hidden_imports (Optional[List[str]]): A list of modules to include in the package (e.g., ['numpy']). This will override hidden_imports_from_requirements.
         hidden_imports_from_requirements (Optional[str]): Path to a requirements.txt file to extract hidden imports. This will be ignored if hidden_imports is provided.
@@ -280,8 +302,9 @@ def pack(
             cmd.extend(["--add-binary", f"{src}:{dest}"])
 
     # Add data files
-    if data_files:
-        for data in data_files:
+    expanded_data_files = _expand_wildcards(source_dir, data_files)
+    if expanded_data_files:
+        for data in expanded_data_files:
             src_path = os.path.join(abs_source_dir, data)
             if not os.path.exists(src_path):
                 continue
@@ -371,7 +394,7 @@ def compile_and_pack(
 
     Args:
         main_file (str): The main Python file (relative to source_dir) that won't be compiled but packed even exclude_files specifies it.
-        data_files (Optional[List[str]]): A list of data files/directories to include (relative to source_dir).
+        data_files (Optional[List[str]]): A list of data files/directories to include (relative to source_dir). Support wildcards.
         exclude_files (Optional[List[str]]): A list of files/directories to exclude (relative to source_dir).
         hidden_imports (Optional[List[str]]): A list of modules to include in the package. This will override hidden_imports_from_requirements.
         hidden_imports_from_requirements (Optional[str]): Path to a requirements.txt file to extract hidden imports. This will be ignored if hidden_imports is provided.

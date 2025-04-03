@@ -39,7 +39,7 @@ from build_helper import compile
 
 compile(
     main_file="main.py",
-    data_files=["data"],
+    data_files=["data", "**/*.json"],
     exclude_files=["test"],
     source_dir=".",
     intermediate_dir="build",
@@ -56,7 +56,7 @@ from build_helper import pack
 
 pack(
     main_file="main.py",
-    data_files=["data"],
+    data_files=["data", "**/*.json"],
     exclude_files=["test"],
     hidden_imports=["numpy"],
     executable_name="my_app",
@@ -80,7 +80,7 @@ from build_helper import compile_and_pack
 
 compile_and_pack(
     main_file="main.py",
-    data_files=["data"],
+    data_files=["data", "**/*.json"],
     exclude_files=["test"],
     hidden_imports=["numpy"],
     executable_name="my_app",
